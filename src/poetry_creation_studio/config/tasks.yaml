@@ -1,0 +1,47 @@
+---
+parse_request:
+  description: 'Parse the user request: {input} into structured components: subject,
+    tone, form, constraints, language, and length. Create a detailed brief that will
+    guide the poetry creation process.'
+  expected_output: 'A structured analysis of the user request broken down into: subject
+    (what the poem is about), tone (emotional feeling), form (sonnet, haiku, free
+    verse, etc.), constraints (rhyme scheme, meter, etc.), language (English, Spanish,
+    etc.), and length (number of lines/stanzas). Include any special requirements
+    or preferences.'
+  agent: orchestrator
+draft_poem:
+  description: Create an original poem based on the parsed requirements. Focus on
+    meeting all specified constraints while crafting compelling, emotionally resonant
+    verse. Include a title for the poem.
+  expected_output: A complete poem with title that adheres to the specified requirements
+    for subject, tone, form, constraints, language, and length. The poem should be
+    original, well-crafted, and emotionally engaging.
+  agent: poet
+  context:
+  - parse_request
+critique_poem:
+  description: Evaluate the poem against the original requirements. Provide a numerical
+    score (1-10) and detailed feedback covering technical merit, emotional impact,
+    adherence to constraints, and overall quality. Identify specific strengths and
+    areas for improvement.
+  expected_output: 'A comprehensive evaluation including: numerical score (1-10),
+    assessment of how well the poem meets requirements, analysis of technical craft,
+    emotional effectiveness, and specific suggestions for improvement if needed. Include
+    whether the poem should be DELIVERED, REVISED, or REWRITTEN.'
+  agent: critic
+  context:
+  - parse_request
+  - draft_poem
+final_decision:
+  description: 'Review the critique and make the final decision: DELIVER, REVISE,
+    or REWRITE. If DELIVER, format the final result as JSON. If REVISE or REWRITE
+    is needed and under 3 total iterations, coordinate the revision process. Track
+    iterations and maintain decision trace.'
+  expected_output: 'Final JSON output with this exact schema: {"status": "ok", "poem_title":
+    "string", "poem_text": "string", "meta": {"iterations": number, "critic_score":
+    number, "decision_trace": ["DELIVER|REVISE|REWRITE", "..."]}}'
+  agent: orchestrator
+  context:
+  - parse_request
+  - draft_poem
+  - critique_poem
